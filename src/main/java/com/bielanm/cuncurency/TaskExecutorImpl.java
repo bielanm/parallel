@@ -1,9 +1,9 @@
 package com.bielanm.cuncurency;
 
 
-public class TaskExecutorImpl implements TaskExecutor {
+public class TaskExecutorImpl implements Runnable, TaskExecutor {
 
-    private final BlockingQueue queue;
+    protected final BlockingQueue queue;
 
     public TaskExecutorImpl(BlockingQueue queue) {
         this.queue = queue;
@@ -24,4 +24,5 @@ public class TaskExecutorImpl implements TaskExecutor {
         Runnable task = queue.dequeue();
         task.run();
     }
+
 }

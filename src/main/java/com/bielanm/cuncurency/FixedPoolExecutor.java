@@ -6,7 +6,8 @@ import java.util.List;
 public abstract class FixedPoolExecutor implements PoolExecutor {
 
     private final int coreThreadCount;
-    private BlockingQueue queue;
+    protected final BlockingQueue queue;
+    protected final List<Throwable> errors = new ArrayList<>();
 
     private List<Thread> threads;
 
@@ -21,8 +22,14 @@ public abstract class FixedPoolExecutor implements PoolExecutor {
 
         TaskExecutorFactory executorFactory = getTaskExecutorFactory();
         for (int i = 0; i < coreThreadCount; i++) {
-            Runnable task = executorFactory.createTaskExecutor(queue);
-            Thread thread = new Thread(task);
+            TaskExecutor task = executorFactory.createTaskExecutor(queue);
+            Thread thread = new Thread(() -> {
+                try {
+                    task.execute();
+                } catch (InterruptedException e) {
+                    errors.add(e);
+                }
+            });
             threads.add(thread);
             thread.start();
         }
@@ -32,6 +39,11 @@ public abstract class FixedPoolExecutor implements PoolExecutor {
         queue.enqueue(task);
     }
 
+    public void submit(List<Runnable> tasks) {
+        for (Runnable task: tasks) {
+            queue.enqueue(task);
+        }
+    }
 
     public abstract TaskExecutorFactory getTaskExecutorFactory();
 

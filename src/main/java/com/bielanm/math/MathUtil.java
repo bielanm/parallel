@@ -4,6 +4,8 @@ import com.bielanm.cuncurency.Cuncurent;
 import com.bielanm.cuncurency.PoolExecutor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -21,29 +23,24 @@ public class MathUtil {
     }
 
     public static Result multiplyCuncurrent(IntVector[] pool1,  IntVector[] pool2, int POOL_SIZE) throws InterruptedException {
-        PoolExecutor executor = Cuncurent.simpleFixedPoolExecutor(POOL_SIZE);
-        return null;
+        checkValid(Arrays.asList(pool1), Arrays.asList(pool2));
 
+        Integer[] results = new Integer[pool1.length];
+        List<Runnable> tasks = new ArrayList<>(pool1.length);
+        for (int i = 0; i < pool1.length; i++) {
+            final int index = i;
+            tasks.add(() -> results[index] = pool1[index].multiply(pool2[index]));
+        }
+        
+        PoolExecutor executor = Cuncurent.blockingFixedPoolExecutor(POOL_SIZE);
+        long time = System.currentTimeMillis();
+        executor.submit(tasks);
+        return new Result(System.currentTimeMillis() - time, results);
+    }
 
-
-//        ExecutorService executor = new ThreadPoolExecutor(POOL_SIZE, POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue());
-//        List<Callable<Integer>> tasks = new ArrayList<>(pool1.length);
-//        for(int i = 0; i < pool1.length; i++){
-//            final int index = i;
-//            tasks.add(() -> pool1[index].multiply(pool2[index]));
-//        }
-//
-//        long time = System.currentTimeMillis();
-//        List<Future<Integer>> futures = executor.invokeAll(tasks);
-//        time = System.currentTimeMillis() - time;
-//
-//        Integer result[] = futures
-//                .stream()
-//                .map(integerFuture -> IntegerToInt(integerFuture))
-//                .collect(Collectors.toList())
-//                .toArray(new Integer[pool1.length]);
-//        executor.shutdown();
-//        return new Result(time, result);
+    private static void checkValid(Collection one, Collection second) {
+        if(one.size() != second.size())
+            throw new IllegalArgumentException("Params should have same size!");
     }
 
     public static <T> T[] fillArray(T[] array, ArrayElementFactory<T> elementFactory) {

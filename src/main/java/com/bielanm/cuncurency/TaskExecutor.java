@@ -1,5 +1,5 @@
 package com.bielanm.cuncurency;
 
-public interface TaskExecutor extends Runnable {
+public interface TaskExecutor {
     void execute() throws InterruptedException;
 }

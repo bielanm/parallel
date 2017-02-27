@@ -10,8 +10,8 @@ import java.util.Arrays;
 public class FirstSolution {
     private static final Randomizer rnd = new Randomizer();
 
-    private static final int SIZE = 1000;
-    private static final int VECTOR_SIZE = 100000;
+    private static final int SIZE = 10;
+    private static final int VECTOR_SIZE = 10;
     private static final int MAX = 1000;
     private static final int POOL_SIZE = 4;
 

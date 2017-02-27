@@ -6,4 +6,8 @@ public class Cuncurent {
         return new FixedPoolExecutorImpl(coreThreadCount, new LinkedBlockingQueue());
     }
 
+    public static PoolExecutor blockingFixedPoolExecutor(int coreThredCount) {
+        return new BlockingTaskExecutorImpl(coreThredCount, new LinkedBlockingQueue());
+    }
+
 }
