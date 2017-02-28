@@ -6,10 +6,15 @@ import com.bielanm.cuncurency.LinkedBlockingQueue;
 
 public class CPUQueue extends LinkedBlockingQueue {
 
+    private static int DEFAULT_LIMIT = 10;
     private static int count = 0;
 
     private final int limitSize;
     private final String name;
+
+    public CPUQueue() {
+        this(DEFAULT_LIMIT);
+    }
 
     public CPUQueue(int limitSize) {
         this(limitSize, "Queue_" + count++);

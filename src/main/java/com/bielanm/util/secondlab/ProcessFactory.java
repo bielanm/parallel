@@ -13,7 +13,7 @@ public class ProcessFactory {
     }
 
     public static Process newProcessWithMaxSleepTime() {
-        return new Process(rndmz.nextLong() % MAX_SLEEP_MILISECONDS);
+        return new Process(MAX_SLEEP_MILISECONDS);
     }
 
 
