@@ -8,14 +8,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MathUtil {
 
     public static Result multiply(IntVector[] pool1,  IntVector[] pool2) {
-        long time = System.currentTimeMillis();
         Integer[] value = fillArray(new Integer[pool1.length], (i) -> new Integer(0));
+        long time = System.currentTimeMillis();
         for(int i = 0; i < pool1.length; i++){
             value[i] += pool1[i].multiply(pool2[i]);
         }
@@ -36,6 +34,36 @@ public class MathUtil {
         long time = System.currentTimeMillis();
         executor.submit(tasks);
         return new Result(System.currentTimeMillis() - time, results);
+    }
+
+    public static Result multiplyThreading(final IntVector[] pool1, final IntVector[] pool2, int POOL_SIZE) throws InterruptedException {
+        checkValid(Arrays.asList(pool1), Arrays.asList(pool2));
+
+        final Integer[] results = new Integer[pool1.length];
+        List<Thread> threads = new ArrayList<>(POOL_SIZE);
+        int range = pool1.length / POOL_SIZE;
+        for (int i = 0; i < POOL_SIZE; i++) {
+            final int start = i * range;
+            final int end = (i == POOL_SIZE - 1) ? pool1.length : start + range;
+            threads.add(new Thread(() -> {
+                multiply(start, end, pool1, pool2, results);
+            }));
+        }
+
+        long time = System.currentTimeMillis();
+        threads.stream().forEach(thread -> thread.start());
+
+        for (Thread thread: threads) {
+            thread.join();
+        }
+
+        return new Result(System.currentTimeMillis() - time, results);
+    }
+
+    private static void multiply(int start, int end, IntVector[] v1, IntVector[] v2, Integer[] result) {
+        for (int i = start; (i < end) && (i < v1.length); i++) {
+            result[i] = v1[i].multiply(v2[i]);
+        }
     }
 
     private static void checkValid(Collection one, Collection second) {

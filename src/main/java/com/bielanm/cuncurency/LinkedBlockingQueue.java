@@ -4,7 +4,7 @@ package com.bielanm.cuncurency;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class LinkedBlockingQueue implements BlockingQueue{
+public class LinkedBlockingQueue implements BlockingQueue {
 
     private Queue<Runnable> queue;
 
@@ -25,9 +25,13 @@ public class LinkedBlockingQueue implements BlockingQueue{
     }
 
     @Override
-    public synchronized Runnable dequeue() throws InterruptedException {
+    public synchronized Runnable dequeue() {
         while(queue.size() == 0) {
-            wait();
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return queue.poll();
     }

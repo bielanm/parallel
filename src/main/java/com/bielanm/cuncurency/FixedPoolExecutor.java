@@ -23,13 +23,7 @@ public abstract class FixedPoolExecutor implements PoolExecutor {
         TaskExecutorFactory executorFactory = getTaskExecutorFactory();
         for (int i = 0; i < coreThreadCount; i++) {
             TaskExecutor task = executorFactory.createTaskExecutor(queue);
-            Thread thread = new Thread(() -> {
-                try {
-                    task.execute();
-                } catch (InterruptedException e) {
-                    errors.add(e);
-                }
-            });
+            Thread thread = new Thread(task);
             threads.add(thread);
             thread.start();
         }

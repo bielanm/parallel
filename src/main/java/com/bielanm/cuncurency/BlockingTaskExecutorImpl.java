@@ -11,25 +11,25 @@ public class BlockingTaskExecutorImpl extends FixedPoolExecutorImpl {
     public void submit(List<Runnable> tasks) {
         int taskCount = tasks.size();
         Object waiter = new Object();
-        CountHandler handler = new CountHandler(taskCount, () -> waiter.notify());
+        CountHandler handler = new CountHandler(taskCount, () -> {
+                synchronized (waiter) {
+                    waiter.notify();
+                }
+            });
 
-        try {
-            for (Runnable task : tasks) {
-                queue.enqueue(() -> {
-                    task.run();
-                    try {
-                        handler.endTask();
-                    } catch (InterruptedException e) {
-                        errors.add(e);
-                    }
-                });
-            }
+        for (Runnable task : tasks) {
+            queue.enqueue(() -> {
+                task.run();
+                handler.endTask();
+            });
+        }
 
-            synchronized (waiter){
+        synchronized (waiter){
+            try {
                 waiter.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            errors.add(e);
         }
     }
 }

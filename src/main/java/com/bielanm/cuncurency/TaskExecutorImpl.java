@@ -1,7 +1,7 @@
 package com.bielanm.cuncurency;
 
 
-public class TaskExecutorImpl implements Runnable, TaskExecutor {
+public class TaskExecutorImpl implements TaskExecutor {
 
     protected final BlockingQueue queue;
 
@@ -12,15 +12,11 @@ public class TaskExecutorImpl implements Runnable, TaskExecutor {
     @Override
     public final void run() {
         while (true) {
-            try {
-                execute();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            execute();
         }
     }
 
-    public void execute() throws InterruptedException {
+    public void execute() {
         Runnable task = queue.dequeue();
         task.run();
     }
