@@ -2,21 +2,19 @@ package com.bielanm.util.secondlab;
 
 
 import com.bielanm.OverflowException;
-import com.bielanm.cuncurency.BlockingQueue;
-import com.bielanm.cuncurency.LinkedBlockingQueue;
-import com.bielanm.util.Randomizer;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 public class CPUProcess implements Runnable {
 
     private final long sleepMilis;
-    private final List<BlockingQueue> queues = new LinkedList<>();
+    private final List<CPU> cpus = new LinkedList<>();
+    private final List<CPUQueue> queues = new LinkedList<>();
 
-    public CPUProcess(long sleepMilis, BlockingQueue queue) {
-        queues.add(queue);
+    private volatile int processCount = 0;
+
+    public CPUProcess(long sleepMilis) {
         this.sleepMilis = sleepMilis;
     }
 
@@ -26,16 +24,36 @@ public class CPUProcess implements Runnable {
         try {
             while (true) {
                 Thread.sleep(sleepMilis);
-                offerProcess(ProcessFactory.newProcessWithRandomSleepTime());
+                offerProcess(ProcessFactory.newProcessWithRandomExecTime());
             }
         } catch (InterruptedException exc) {
-            throw new RuntimeException(exc);
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            StringBuilder msg = new StringBuilder();
+            cpus.forEach(cpu -> {
+                cpu.shutdown();
+                msg.append("\n")
+                        .append(cpu.getName() + " execute " + cpu.getExecutedTasks() + "/" + processCount);
+            });
+            if(queues.size() > 0) {
+                CPUQueue last = queues.get(queues.size() - 1);
+                msg.append("\n")
+                        .append("Last queue: " + last.getName() + ", max size: " + last.getMaxSize());
+            } else {
+                msg.append("Queues is empty");
+            }
+            msg.append("\n");
+
+            System.out.println(msg.toString());
         }
     }
 
     private void offerProcess(Process process) {
-
-        for (BlockingQueue queue : queues) {
+        processCount++;
+        for (CPUQueue queue : queues) {
             try {
                 queue.enqueue(process);
                 return;
@@ -47,10 +65,11 @@ public class CPUProcess implements Runnable {
     }
 
     private void runProcessInNewQueue(Process process) {
-        BlockingQueue newQueue = new CPUQueue();
+        CPUQueue newQueue = new CPUQueue();
         newQueue.enqueue(process);
+        System.out.println(newQueue.getName() + " was created.");
         queues.add(newQueue);
-        new CPU(newQueue);
+        cpus.add(new CPU(newQueue));
     }
 
 }

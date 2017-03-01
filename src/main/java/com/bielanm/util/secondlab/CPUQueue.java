@@ -12,6 +12,8 @@ public class CPUQueue extends LinkedBlockingQueue {
     private final int limitSize;
     private final String name;
 
+    private volatile int maxSize = 0;
+
     public CPUQueue() {
         this(DEFAULT_LIMIT);
     }
@@ -25,23 +27,24 @@ public class CPUQueue extends LinkedBlockingQueue {
         this.name = name;
     }
 
-    @Override
-    public synchronized Runnable dequeue() {
-        return super.dequeue();
-    }
-
-    @Override
-    public synchronized void enqueue(Runnable runnable) {
+    public synchronized void enqueue(Process process) {
         checkOverflowing();
-        super.enqueue(runnable);
+        System.out.println(process.getName() + " was added to " + getName() + ".");
+        super.enqueue(process);
     }
 
     private void checkOverflowing() {
-        if(size() == limitSize)
+        int size = size();
+        maxSize = size > maxSize ? size : maxSize;
+        if(size == limitSize)
             throw new OverflowException("Queue " + name + " overflowing!...");
     }
 
-    private boolean allowed(){
-        return (limitSize - size()) > 0;
+    public String getName() {
+        return name;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
     }
 }

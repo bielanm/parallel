@@ -18,12 +18,12 @@ public class LinkedBlockingQueue extends LinkedList<Runnable> implements Blockin
 
     @Override
     public synchronized Runnable dequeue() {
-        while(size() == 0) {
-            try {
+        try {
+            while (size() == 0) {
                 wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         return poll();
     }

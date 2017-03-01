@@ -9,6 +9,7 @@ public class BlockingTaskExecutorImpl extends FixedPoolExecutorImpl {
     }
 
     public void submit(List<Runnable> tasks) {
+        checkAlive();
         int taskCount = tasks.size();
         Object waiter = new Object();
         CountHandler handler = new CountHandler(taskCount, () -> {

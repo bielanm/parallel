@@ -9,4 +9,6 @@ public interface PoolExecutor {
 
     void submit(List<Runnable> runnables);
 
+    void shutdown();
+
 }
