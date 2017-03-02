@@ -1,4 +1,4 @@
-package com.bielanm;
+package com.bielanm.exceptions;
 
 public class OverflowException extends RuntimeException {
     public OverflowException() {

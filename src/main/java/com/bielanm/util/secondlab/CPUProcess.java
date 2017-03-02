@@ -1,7 +1,7 @@
 package com.bielanm.util.secondlab;
 
 
-import com.bielanm.OverflowException;
+import com.bielanm.exceptions.OverflowException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -27,27 +27,7 @@ public class CPUProcess implements Runnable {
                 offerProcess(ProcessFactory.newProcessWithRandomExecTime());
             }
         } catch (InterruptedException exc) {
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            StringBuilder msg = new StringBuilder();
-            cpus.forEach(cpu -> {
-                cpu.shutdown();
-                msg.append("\n")
-                        .append(cpu.getName() + " execute " + cpu.getExecutedTasks() + "/" + processCount);
-            });
-            if(queues.size() > 0) {
-                CPUQueue last = queues.get(queues.size() - 1);
-                msg.append("\n")
-                        .append("Last queue: " + last.getName() + ", max size: " + last.getMaxSize());
-            } else {
-                msg.append("Queues is empty");
-            }
-            msg.append("\n");
-
-            System.out.println(msg.toString());
+            printResult();
         }
     }
 
@@ -70,6 +50,30 @@ public class CPUProcess implements Runnable {
         System.out.println(newQueue.getName() + " was created.");
         queues.add(newQueue);
         cpus.add(new CPU(newQueue));
+    }
+
+    void printResult() {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        StringBuilder msg = new StringBuilder();
+        cpus.forEach(cpu -> {
+            cpu.shutdown();
+            msg.append("\n")
+                    .append(cpu.getName() + " execute " + cpu.getExecutedTasks() + "/" + processCount);
+        });
+        if(queues.size() > 0) {
+            CPUQueue last = queues.get(queues.size() - 1);
+            msg.append("\n")
+                    .append("Last queue: " + last.getName() + ", max size: " + last.getMaxSize());
+        } else {
+            msg.append("Queues is empty");
+        }
+        msg.append("\n");
+
+        System.out.println(msg.toString());
     }
 
 }

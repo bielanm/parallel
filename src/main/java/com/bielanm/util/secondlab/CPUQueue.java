@@ -1,7 +1,7 @@
 package com.bielanm.util.secondlab;
 
 
-import com.bielanm.OverflowException;
+import com.bielanm.exceptions.OverflowException;
 import com.bielanm.cuncurency.LinkedBlockingQueue;
 
 public class CPUQueue extends LinkedBlockingQueue {
