@@ -1,23 +1,20 @@
 package com.bielanm.net;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import com.bielanm.cuncurency.PoolExecutor;
+import com.bielanm.net.exceptions.HttpFormatException;
+
+import java.io.*;
 
 import static java.util.Objects.nonNull;
 
 public class HttpConnectionHandler implements ConnectionHandler {
 
-    private final HttpRequestHandler httpRequestHandler;
-    private final HttpInterfacesFactory httpInterfacesFactory;
+    private final RequestHandler requestHandler;
+    private final PoolExecutor poolExecutor;
 
-    public HttpConnectionHandler(HttpRequestHandler httpRequestHandler, HttpInterfacesFactory httpInterfacesFactory) {
-        this.httpRequestHandler = httpRequestHandler;
-        this.httpInterfacesFactory = httpInterfacesFactory;
+    public HttpConnectionHandler(RequestHandler requestHandler, PoolExecutor poolExecutor) {
+        this.requestHandler = requestHandler;
+        this.poolExecutor = poolExecutor;
     }
 
 
@@ -33,9 +30,13 @@ public class HttpConnectionHandler implements ConnectionHandler {
             request.append(line).append("\n");
         }
 
-        HttpRequest httpRequest = httpInterfacesFactory.createHttpRequest(request.toString());
-        HttpResponse httpResponse = httpInterfacesFactory.createHttpResponse(printWriter);
-        httpRequestHandler.handleRequest(httpRequest, httpResponse);
+        try {
+            final HttpRequest httpRequest = HttpInterfacesFactory.createHttpRequest(request.toString());
+            final HttpResponse httpResponse = HttpInterfacesFactory.createHttpResponse(printWriter, httpRequest);
+            poolExecutor.submit(() -> requestHandler.handleRequest(httpRequest, httpResponse));
+        } catch (HttpFormatException exc) {
+            printWriter.close();
+        }
     }
 
     @Override
