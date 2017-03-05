@@ -1,25 +1,47 @@
 package com.bielanm;
 
-import com.bielanm.cuncurency.Cuncurent;
-import com.bielanm.cuncurency.PoolExecutor;
-import com.bielanm.net.ConnectionHandler;
-import com.bielanm.net.HttpConnectionHandler;
-import com.bielanm.net.HttpRequestHandler;
-import com.bielanm.net.RequestHandler;
-import com.bielanm.net.Server;
-import com.bielanm.net.SocketServer;
+
+import com.bielanm.expresslike.ExpresslikeApp;
+import com.bielanm.expresslike.ExpresslikeRequestHandlerImpl;
+import com.bielanm.expresslike.ExpresslikeTemplateEngine;
+import com.bielanm.expresslike.TemplateEngine;
+import com.bielanm.util.fifthlab.ShakespeareRandomizer;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class FifthSolution {
 
-    public static final int POOL_EXECUTOR_SIZE = 10;
 
-    public static void main(String[] args) {
-        PoolExecutor poolExecutor = Cuncurent.blockingFixedPoolExecutor(POOL_EXECUTOR_SIZE);
-        RequestHandler requestHandler = new HttpRequestHandler();
-        ConnectionHandler connectionHandler = new HttpConnectionHandler(requestHandler, poolExecutor);
+    private static final String SHAKESPEARE_FILE_PATH = "src/main/resources/shakespeare_sonets.txt";
+    private static final String helloWorld =
+            "<html>"+
+                "<header>" +
+                    "<title>Shakespeare</title>" +
+                "</header>"+
+                "<body>"+
+                    "sonet" +
+                "</body>"+
+            "</html>";
 
-        Server server = new SocketServer(8181, connectionHandler);
-        server.start();
+    public static void main(String[] args) throws IOException {
+        ShakespeareRandomizer shakespeareRandomizer = ShakespeareRandomizer.newInstance(SHAKESPEARE_FILE_PATH);
+
+        TemplateEngine engine = new ExpresslikeTemplateEngine();
+        ExpresslikeApp app = ExpresslikeApp.listen(8181, new ExpresslikeRequestHandlerImpl());
+        app.addGet("/", (httpRequest, httpResponse) -> {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("sonet", shakespeareRandomizer.getRandom().stream().map(line -> "<p>" + line + "</p>").collect(Collectors.joining()));
+                    httpResponse.sendHtml(app.getTemplateEngine().handle(helloWorld, params));
+                    httpResponse.end();
+           })
+           .addStatic("templates")
+           .addElse((httpRequest, httpResponse) -> {
+               httpResponse.redirect("/");
+           });
+        app.start();
     }
 
 }

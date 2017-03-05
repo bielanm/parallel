@@ -1,4 +1,6 @@
 package com.bielanm.net.exceptions;
 
-public class HttpFormatException extends Exception {
+import java.io.IOException;
+
+public class HttpFormatException extends IOException {
 }

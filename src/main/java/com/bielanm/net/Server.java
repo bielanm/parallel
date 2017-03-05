@@ -1,8 +1,8 @@
 package com.bielanm.net;
 
-public interface Server {
+public interface Server extends AutoCloseable {
 
     void start();
-    void stop();
+    void close() throws Exception;
 
 }

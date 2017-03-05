@@ -1,11 +1,10 @@
 package com.bielanm.net;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.bielanm.net.HttpStatus.*;
 
 public class HttpResponse {
 
@@ -22,9 +21,7 @@ public class HttpResponse {
     public void init(HttpRequest request) {
         httpProtocol = request.getProtocol();
         headers = new HashMap<>();
-        headers.putAll(request.getHeaders()
-                .entrySet()
-                .stream()
+        headers.putAll(request.getHeaders().entrySet().stream()
                 .filter((e) -> e.getKey().equalsIgnoreCase("cache-control") ||
                                e.getKey().equalsIgnoreCase("connection"))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
@@ -48,13 +45,29 @@ public class HttpResponse {
         this.status = status;
     }
 
-
     public void end() {
         StringBuilder response = new StringBuilder();
-        response.append(httpProtocol + " " + status.code + " " + status.toString()).append("\n");
-        headers.forEach((k, v) -> response.append(String.join(": ", k, v)).append("\n"));
-        Optional.ofNullable(body).ifPresent((body) -> response.append(body));
+        status = Objects.isNull(status) ? OK : status;
+        response.append(httpProtocol + " " + status.code + " " + status.toString()).append("\r\n");
+        headers.forEach((k, v) -> response.append(String.join(": ", k, v)).append("\r\n"));
+        response.append("\r\n");
+        Optional.ofNullable(body).ifPresent(body -> response.append(body));
+        System.out.println("Response:\n" + response.toString());
         writer.write(response.toString());
-        writer.close();
+        writer.flush();
+    }
+
+    public void end(String body) {
+        sendBody(body);
+        end();
+    }
+
+    public void redirect(String path) {
+        StringBuilder response = new StringBuilder();
+        response.append(httpProtocol + " " + FOUND.code + " " + FOUND.toString()).append("\r\n");
+        response.append("Location: " + path).append("\n");
+        response.append("\r\n");
+        writer.write(response.toString());
+        writer.flush();
     }
 }

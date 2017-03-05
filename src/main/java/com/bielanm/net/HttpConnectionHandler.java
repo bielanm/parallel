@@ -2,8 +2,10 @@ package com.bielanm.net;
 
 import com.bielanm.cuncurency.PoolExecutor;
 import com.bielanm.net.exceptions.HttpFormatException;
+import com.sun.corba.se.impl.legacy.connection.SocketFactoryContactInfoListImpl;
 
 import java.io.*;
+import java.net.Socket;
 
 import static java.util.Objects.nonNull;
 
@@ -19,27 +21,29 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 
     @Override
-    public void handle(InputStream inputStream, OutputStream outputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public void handle(Socket socket) throws IOException {
+        InputStream inputStream = socket.getInputStream();
+        OutputStream outputStream = socket.getOutputStream();
         PrintWriter printWriter = new PrintWriter(outputStream);
 
-        StringBuilder request = new StringBuilder();
-
-        String line = null;
-        while (nonNull(line = bufferedReader.readLine())) {
-            request.append(line).append("\n");
-        }
-
-        try {
-            final HttpRequest httpRequest = HttpInterfacesFactory.createHttpRequest(request.toString());
-            final HttpResponse httpResponse = HttpInterfacesFactory.createHttpResponse(printWriter, httpRequest);
-            poolExecutor.submit(() -> requestHandler.handleRequest(httpRequest, httpResponse));
-        } catch (HttpFormatException exc) {
-            printWriter.close();
-        }
+        int length = inputStream.available();
+        byte[] requestBody = new byte[length];
+        inputStream.read(requestBody);
+        String request = new String(requestBody);
+        System.out.println("Request:\n" + request);
+        final HttpRequest httpRequest = HttpInterfacesFactory.createHttpRequest(request);
+        final HttpResponse httpResponse = HttpInterfacesFactory.createHttpResponse(printWriter, httpRequest);
+        poolExecutor.submit(() -> {
+            try(Socket close = socket) {
+                requestHandler.handleRequest(httpRequest, httpResponse);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
-    public void shutDown() {
+    public void close() throws Exception {
+        poolExecutor.shutdown();
     }
 }
