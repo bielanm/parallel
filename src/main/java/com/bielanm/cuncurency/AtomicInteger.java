@@ -11,4 +11,5 @@ public class AtomicInteger {
     synchronized public int decrementAndGet() {
         return value = value - 1;
     }
+    synchronized public int get() { return value; }
 }

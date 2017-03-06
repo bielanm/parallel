@@ -27,7 +27,7 @@ public class BlockingTaskExecutorImpl extends FixedPoolExecutorImpl {
 
         synchronized (waiter){
             try {
-                waiter.wait();
+                if(handler.get() != 0) waiter.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -11,8 +11,16 @@ public class CountHandler implements Command {
     }
 
     public void endTask() {
-        int result = this.counter.decrementAndGet();
-        if(result == 0) execute();
+        this.counter.decrementAndGet();
+        check();
+    }
+
+    public void check() {
+        if(counter.get() == 0) execute();
+    }
+
+    public int get() {
+        return this.counter.get();
     }
 
     @Override
