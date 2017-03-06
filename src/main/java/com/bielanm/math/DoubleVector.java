@@ -6,23 +6,23 @@ import com.bielanm.util.Randomizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class IntVector extends NotNullArrayList<Integer> implements Vector<Integer>{
+public class DoubleVector extends NotNullArrayList<Double> implements Vector<Double>{
 
     public static final int MAX_ELEMENT = 10;
     public static final Randomizer rnd = new Randomizer();
 
     @Override
-    public Integer multiply(Vector<Integer> vector) {
+    public Double multiply(Vector<Double> vector) {
         checkValid(vector);
-        Integer result = Integer.valueOf(0);
+        Double result = Double.valueOf(0);
         for(int i = 0; i < size(); i++) {
             result += multiply(get(i), vector.get(i));
         }
         return result;
     }
 
-    private Integer multiply(Integer val1, Integer val2){
-        return val1.intValue()*val2.intValue();
+    private Double multiply(Double val1, Double val2){
+        return val1.doubleValue()*val2.doubleValue();
     }
 
     private void checkValid(Vector vector) {
@@ -30,14 +30,14 @@ public class IntVector extends NotNullArrayList<Integer> implements Vector<Integ
             throw new IllegalArgumentException("Vectors should have same size and IntVector type!");
     }
 
-    public static IntVector newRandom(int n) {
+    public static DoubleVector newRandom(int n) {
         return newRandom(n, MAX_ELEMENT);
     }
 
-    public static IntVector newRandom(int n, int maxElement) {
-        IntVector vector = new IntVector();
+    public static DoubleVector newRandom(int n, int maxElement) {
+        DoubleVector vector = new DoubleVector();
         Stream.iterate(0, i -> {
-            vector.add(rnd.nextInt(maxElement));
+            vector.add(Double.valueOf(rnd.nextInt(Math.abs(maxElement))));
             return i;
         }).limit(n + 1).collect(Collectors.toList());
         return vector;
@@ -47,4 +47,5 @@ public class IntVector extends NotNullArrayList<Integer> implements Vector<Integ
     public String toString() {
         return stream().map(i -> i.toString()).collect(Collectors.joining(", "));
     }
+
 }
