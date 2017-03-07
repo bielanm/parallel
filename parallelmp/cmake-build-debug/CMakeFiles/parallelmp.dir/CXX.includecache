@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mishab/project/parallelmp/IntVector.cpp
+cstdlib
+-
+vector
+-
+IntVector.h
+/home/mishab/project/parallelmp/IntVector.h
+
+/home/mishab/project/parallelmp/IntVector.h
+vector
+-
+ostream
+-
+
+/home/mishab/project/parallelmp/MathUtil.cpp
+iostream
+-
+MathUtil.h
+/home/mishab/project/parallelmp/MathUtil.h
+IntVector.h
+/home/mishab/project/parallelmp/IntVector.h
+
+/home/mishab/project/parallelmp/MathUtil.h
+IntVector.h
+/home/mishab/project/parallelmp/IntVector.h
+
+/home/mishab/project/parallelmp/main.cpp
+iostream
+-
+cstdlib
+-
+ctime
+-
+IntVector.h
+/home/mishab/project/parallelmp/IntVector.h
+MathUtil.h
+/home/mishab/project/parallelmp/MathUtil.h
+

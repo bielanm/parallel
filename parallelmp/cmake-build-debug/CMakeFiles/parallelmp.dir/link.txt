@@ -1,0 +1,1 @@
+/usr/bin/c++   -g   CMakeFiles/parallelmp.dir/main.cpp.o CMakeFiles/parallelmp.dir/IntVector.cpp.o CMakeFiles/parallelmp.dir/MathUtil.cpp.o  -o parallelmp 

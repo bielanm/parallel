@@ -1,0 +1,4 @@
+/home/mishab/clion/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/mishab/project/parallelmp
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/mishab/project/parallelmp/cmake-build-debug
