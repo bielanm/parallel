@@ -1,5 +1,6 @@
 package com.bielanm.math;
 
+import com.bielanm.FourthSolution;
 import com.bielanm.cuncurency.Cuncurent;
 import com.bielanm.cuncurency.PoolExecutor;
 
@@ -7,9 +8,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Optional;
+
 
 public class MathUtil {
+
+    public static final double EPS = 0.000001;
+    private static PoolExecutor poolExecutor = Cuncurent.blockingFixedPoolExecutor(FourthSolution.THREAD_COUNT);
 
     public static Result multiply(IntVector[] pool1,  IntVector[] pool2) {
         Integer[] value = fillArray(new Integer[pool1.length], (i) -> new Integer(0));
@@ -78,13 +83,102 @@ public class MathUtil {
         return array;
     }
 
+    public static Double determinant(Matrix matrix) {
+        Matrix copy = Matrix.copy(matrix);
+        MathUtil.straightCalc(copy, DoubleVector.newRandom(matrix.getOrder()));
+        MathUtil.backCalc(copy, DoubleVector.newRandom(matrix.getOrder()));
 
-    private static Integer IntegerToInt(Future<Integer> val) {
-        try {
-            return val.get();
-        } catch (Exception e) {
-            return 0;
+        Double det = 1d;
+        for (int i = 0; i < copy.getOrder(); i++) {
+            det *= copy.getElem(i, i);
         }
+        return det;
+    }
+
+    public static void straightCalc(Matrix matrix, DoubleVector vector) {
+        List<DoubleVector> rows = matrix.getRows();
+        List<Runnable> tasks = new ArrayList<>();
+
+        for (int i = 0; i < matrix.getOrder(); i++) {
+            final int columnNumber = i;
+            useMainElementByColumn(matrix, vector, columnNumber);
+            DoubleVector start = rows.get(columnNumber);
+            for (int j = columnNumber + 1; j < matrix.getOrder(); j++) {
+                final int row = j;
+                final DoubleVector currentVector = rows.get(row);
+                if (currentVector.get(columnNumber) != 0) {
+                    final Double koef = currentVector.get(columnNumber)/start.get(columnNumber);
+                    tasks.add(() -> {
+                        rows.set(row, subtraction(currentVector, multiply(start, koef)));
+                        vector.set(row, vector.get(row) - vector.get(columnNumber)*koef);
+                    });
+                }
+            }
+            poolExecutor.submit(tasks);
+            tasks.clear();
+        }
+    }
+
+    private static void useMainElementByColumn(Matrix matrix, DoubleVector vector, int columnNumber) {
+        int max = columnNumber;
+        for (int i = columnNumber + 1; i < matrix.getOrder(); i++) {
+            double next = matrix.getElem(i, columnNumber);
+            if(next > matrix.getElem(max, columnNumber)) max = i;
+        }
+
+        List<DoubleVector> rows = matrix.getRows();
+        DoubleVector toMove = rows.get(columnNumber);
+        rows.set(columnNumber, rows.get(max));
+        rows.set(max, toMove);
+
+        Double temp = vector.get(columnNumber);
+        vector.set(columnNumber, vector.get(max));
+        vector.set(max, temp);
+    }
+
+    public static void backCalc(Matrix matrix, DoubleVector vector) {
+        List<DoubleVector> rows = matrix.getRows();
+        List<Runnable> tasks = new ArrayList<>();
+
+        for (int i = matrix.getOrder() - 1; i >= 0; i--) {
+            final int columnNumber = i;
+            DoubleVector start = rows.get(columnNumber);
+            for (int j = columnNumber - 1; j >= 0; j--) {
+                final int row = j;
+                final DoubleVector currentVector = rows.get(row);
+                if (currentVector.get(columnNumber) != 0) {
+                    final Double koef = currentVector.get(columnNumber)/start.get(columnNumber);
+                    tasks.add(() -> {
+                        rows.set(row, subtraction(currentVector, multiply(start, koef)));
+                        vector.set(row, vector.get(row) - vector.get(columnNumber)*koef);
+                    });
+                }
+            }
+            poolExecutor.submit(tasks);
+            tasks.clear();
+        }
+    }
+
+    public static void normalize(Matrix matrix, DoubleVector vector) {
+        List<DoubleVector> rows = matrix.getRows();
+        for (int i = 0; i < matrix.getOrder(); i++) {
+            DoubleVector current = rows.get(i);
+            Double elem = current.get(i);
+            vector.set(i, vector.get(i)/elem);
+            current.set(i, elem/elem);
+        }
+    }
+
+    public static DoubleVector subtraction(DoubleVector v1, DoubleVector v2){
+        DoubleVector v = new DoubleVector(v1);
+        v.subtraction(v2);
+        return v;
+    }
+
+    public static DoubleVector multiply(DoubleVector v1, Double v2){
+        DoubleVector v = new DoubleVector(v1);
+        v.multiply(v2);
+        return v;
     }
 
     public static class Result {

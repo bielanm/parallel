@@ -6,6 +6,17 @@ import java.util.Optional;
 
 public class NotNullArrayList<T> extends ArrayList<T> {
 
+    public NotNullArrayList(int i) {
+        super(i);
+    }
+
+    public NotNullArrayList() {
+    }
+
+    public NotNullArrayList(Collection<? extends T> collection) {
+        super(collection);
+    }
+
     @Override
     public boolean add(T t) {
         Optional.ofNullable(t).orElseThrow(() -> new NullPointerException());

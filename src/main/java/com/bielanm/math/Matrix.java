@@ -8,9 +8,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.bielanm.math.MathUtil.EPS;
+
 public class Matrix {
 
-    public static final int MAX_ELEMENT = 10;
+    public static final int MAX_ELEMENT = 100;
 
     public static final Randomizer rnd = new Randomizer();
 
@@ -23,21 +25,21 @@ public class Matrix {
 
     public Double getDet() {
         return Optional.ofNullable(det)
-                .orElseGet(() -> {
-                    Double det = 1d;
-                    this.det = det;
-                    return det; //TODO
-                });
+                .orElseGet(() -> det = MathUtil.determinant(this));
     }
 
     public Integer getOrder() {
         return rows.size();
     }
 
+    public List<DoubleVector> getRows() {
+        return rows;
+    }
+
     public static Matrix newRandom(int n) {
         List<DoubleVector> rows = new ArrayList<>();
         Stream.iterate(0, i -> {
-            rows.add(DoubleVector.newRandom(n, rnd.nextInt(MAX_ELEMENT)));
+            rows.add(DoubleVector.newRandom(n, Math.abs(rnd.nextInt(MAX_ELEMENT)) + 1));
             return i;
         }).limit(n + 1).collect(Collectors.toList());
         return new Matrix(rows);
@@ -46,11 +48,17 @@ public class Matrix {
     public static Matrix invertibleNewRandom(int n) {
         while (true) {
             Matrix matrix = newRandom(n);
-            if(matrix.getDet() != 0) {
+            if(Math.abs(copy(matrix).getDet()) > EPS) {
                 return matrix;
             }
         }
     }
+
+
+    public Double getElem(int v1, int v2) {
+        return rows.get(v1).get(v2);
+    }
+
 
     @Override
     public String toString() {
@@ -58,5 +66,14 @@ public class Matrix {
                 .stream()
                 .map(vector -> vector.toString())
                 .collect(Collectors.joining("\n"));
+    }
+
+    public static Matrix copy(Matrix matrix) {
+        List<DoubleVector> rows = new ArrayList<>();
+        List<DoubleVector> existing = matrix.getRows();
+        for (DoubleVector vector: existing) {
+            rows.add(new DoubleVector(vector));
+        }
+        return new Matrix(rows);
     }
 }
