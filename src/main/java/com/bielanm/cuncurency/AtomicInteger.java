@@ -12,4 +12,5 @@ public class AtomicInteger {
         return value = value - 1;
     }
     synchronized public int get() { return value; }
+    synchronized public int incrementAndGet() {return value = value + 1; }
 }

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class LinkedBlockingQueue extends LinkedList<Runnable> implements BlockingQueue {
 
-    volatile private int size = 0;
+    volatile protected int size = 0;
 
     public LinkedBlockingQueue() {
     }
@@ -25,11 +25,9 @@ public class LinkedBlockingQueue extends LinkedList<Runnable> implements Blockin
                 wait();
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
         }
         Runnable runnable = poll();
         size--;
         return runnable;
     }
-
 }

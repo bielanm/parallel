@@ -10,7 +10,7 @@ public abstract class FixedPoolExecutor implements PoolExecutor {
     protected final BlockingQueue queue;
     protected final List<Throwable> errors = new ArrayList<>();
 
-    private List<Thread> threads;
+    protected List<Thread> threads;
 
     public FixedPoolExecutor(int coreThreadCount, BlockingQueue queue) {
         this.coreThreadCount = coreThreadCount;

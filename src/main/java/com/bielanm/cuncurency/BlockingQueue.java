@@ -5,4 +5,6 @@ public interface BlockingQueue {
     void enqueue(Runnable runnable);
     Runnable dequeue();
 
+    int size();
+
 }
