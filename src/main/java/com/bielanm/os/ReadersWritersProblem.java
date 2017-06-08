@@ -6,7 +6,10 @@ import com.bielanm.os.readerswriters.*;
 import com.bielanm.util.Randomizer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
@@ -18,9 +21,9 @@ public class ReadersWritersProblem {
 
     public static final int THREAD_COUNT = 16;
 
-    public static final int DATA_SET_COUNT = 100;
+    public static final int DATA_SET_COUNT = 50;
     public static final int MAX_KEY_LENGTH = 16;
-    public static final int MAX_DATA_LENGTH = 16*16*16;
+    public static final int MAX_DATA_LENGTH = 32;
 
     public static final int MAX_READ_TIME = 10;
     public static final int MAX_WRITE_TIME = 2;
@@ -29,27 +32,49 @@ public class ReadersWritersProblem {
 
         Storage storage = new KeyValueStorage();
 
-        Reader reader = new UselessReader(storage);
-        Writer writer = new UselessWriter(storage);
+        List<Reader> readers = new CopyOnWriteArrayList<>();
+        List<Writer> writers = new CopyOnWriteArrayList<>();
+        List<String> keys = new CopyOnWriteArrayList<>();
+        List<String> data = new CopyOnWriteArrayList<>();
+        List<Runnable> tasks = new CopyOnWriteArrayList<>();
 
-        List<String> keys = new ArrayList<>();
-        List<String> data = new ArrayList<>();
         Stream.iterate(0, i -> {
-            keys.add(randomStr((abs(randomizer.nextInt() % MAX_KEY_LENGTH) + 1)));
+            writers.add(new UselessWriter(storage));
+            keys.add(randomizer.nextInt() % DATA_SET_COUNT + "");
             data.add(randomStr((abs(randomizer.nextInt() % MAX_DATA_LENGTH) + 1)));
+
+            final int num = i;
+            String rndKey = keys.get(i);
+            String rndData = data.get(i);
+
+            tasks.add(() -> {
+                try {
+                    Thread.sleep(abs(randomizer.nextInt() % MAX_WRITE_TIME*70));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                writers.get(num).write(rndKey, rndData);
+            });
             return i + 1;
-        }).limit(DATA_SET_COUNT).count();
+        }).limit((DATA_SET_COUNT + 2)/2).count();
 
-
-        List<Runnable> tasks = new ArrayList<>();
         Stream.iterate(0, i -> {
-            String rndKey = keys.get(abs(randomizer.nextInt() % keys.size()));
-            String rndData = data.get(abs(randomizer.nextInt() % data.size()));
-            tasks.add(() -> writer.write(rndKey, rndData));
-            tasks.add(() -> reader.read(rndKey));
+            readers.add(new UselessReader(storage));
+            final int num = i;
+            String rndKey = keys.get(abs(randomizer.nextInt(DATA_SET_COUNT/2)));
+
+            tasks.add(() -> {
+                try {
+                    Thread.sleep(abs(randomizer.nextInt() % MAX_WRITE_TIME*70));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                readers.get(num).read(rndKey);
+            });
             return i + 1;
         }).limit(DATA_SET_COUNT).count();
 
+        Collections.shuffle(tasks, new Random(59));
 
         PoolExecutor executor = Cuncurent.blockingFixedPoolExecutor(THREAD_COUNT);
 //        Thread observer = new Thread(() ->  {

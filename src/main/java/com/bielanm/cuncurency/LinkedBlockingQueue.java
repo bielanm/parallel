@@ -1,8 +1,10 @@
 package com.bielanm.cuncurency;
 
-import java.util.LinkedList;
 
-public class LinkedBlockingQueue extends LinkedList<Runnable> implements BlockingQueue {
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+public class LinkedBlockingQueue extends ConcurrentLinkedQueue<Runnable> implements BlockingQueue {
 
     volatile protected int size = 0;
 
@@ -29,5 +31,10 @@ public class LinkedBlockingQueue extends LinkedList<Runnable> implements Blockin
         Runnable runnable = poll();
         size--;
         return runnable;
+    }
+
+    @Override
+    public int size() {
+        return size;
     }
 }

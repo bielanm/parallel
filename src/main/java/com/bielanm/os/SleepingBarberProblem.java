@@ -10,6 +10,7 @@ import com.bielanm.util.Randomizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
@@ -18,22 +19,24 @@ public class SleepingBarberProblem {
 
     public static final int BARBER_SHAVE_TIME = 10;
     public static final int THREAD_COUNT = 16;
-    public static final int CLIENTS_COUNT = 1000;
+    public static final int CLIENTS_COUNT = 100;
+
+    public static final int MAX_QUEUE_SIZE = 7;
 
     private static final Randomizer randomizer = new Randomizer();
 
     public static void main(String[] args) {
-        List<Client> clients = new ArrayList<>();
+        List<Client> clients = new CopyOnWriteArrayList<>();
         Stream.iterate(0, i -> {clients.add(new Client()); return i++;}).limit(CLIENTS_COUNT).count();
 
-        BarberQueue barberQueue = new BarberQueue();
+        BarberQueue barberQueue = new BarberQueue(MAX_QUEUE_SIZE);
         Barber barber = new Barber();
         BarberShop barberShop = new BarberShop(barber, barberQueue);
 
         List<Runnable> tasks = new ArrayList<>();
         clients.stream().forEach(client -> tasks.add(() -> {
                 try {
-                    Thread.sleep(abs(randomizer.nextInt() % BARBER_SHAVE_TIME*50));
+                    Thread.sleep(abs(randomizer.nextInt() % BARBER_SHAVE_TIME*20));
                 } catch (InterruptedException e) {
                     System.err.println("Sleep error");
                 }

@@ -6,7 +6,7 @@ import java.lang.*;
 
 public class ProcessFactory {
 
-    private static final long MAX_EXEC_MILISECONDS = 100;
+    private static final long MAX_EXEC_MILISECONDS = 20;
 
     private static final Randomizer rndmz = new Randomizer();
 

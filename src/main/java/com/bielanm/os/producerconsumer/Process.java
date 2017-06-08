@@ -8,6 +8,7 @@ public class Process implements Runnable {
     private static AtomicInteger count = new AtomicInteger(0);
     private final long execMilis;
     private final String name;
+    private String author;
 
     public Process(long execMilis, String name) {
         this.execMilis = execMilis;
@@ -15,14 +16,14 @@ public class Process implements Runnable {
     }
 
     public Process(long execMilis) {
-        this(execMilis, "Process_" + count.incrementAndGet());
+        this(execMilis, "Task" + count.incrementAndGet());
     }
 
 
     @Override
     public void run() {
         long time = System.currentTimeMillis();
-        System.out.println(getName() + " started");
+        System.out.println("Consumer start executing " + getName());
         try {
             for (int i = 0; i < 5; i++) {
                 Thread.sleep(execMilis/5);
@@ -30,7 +31,7 @@ public class Process implements Runnable {
             }
         } catch (InterruptedException e) {
         }
-        System.out.println(name + " finished, execution time: " + (System.currentTimeMillis() - time) + "/" + execMilis + "ms.");
+        System.out.println("Consumer finish execution " + getName() + " , exec_time: " + (System.currentTimeMillis() - time) + "/" + execMilis + "ms.");
 
     }
 
@@ -38,4 +39,16 @@ public class Process implements Runnable {
         return name;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 }

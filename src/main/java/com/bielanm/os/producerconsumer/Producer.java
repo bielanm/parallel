@@ -8,12 +8,16 @@ public class Producer implements Runnable {
     private final int maxProcess;
     private final ProcessQueue blockingQueue;
     private AtomicInteger processCount;
+    private String name;
+    private static int count = 0;
 
     public Producer(ProcessQueue blockingQueue, long sleepMilis, int maxProcess) {
         this.blockingQueue = blockingQueue;
         this.sleepMilis = sleepMilis;
         this.maxProcess = maxProcess;
         processCount = new AtomicInteger(0);
+
+        name = "Producer_" + count++;
     }
 
 
@@ -23,8 +27,10 @@ public class Producer implements Runnable {
             while (maxProcess > processCount.get()) {
                 Thread.sleep(sleepMilis);
                 Process process = ProcessFactory.newProcessWithRandomExecTime();
-                System.out.println(process.getName() + " created");
+                process.setAuthor(getName());
+                //System.out.println(getName() + " create " + process.getName());
                 blockingQueue.enqueue(process);
+                Thread.yield();
                 processCount.incrementAndGet();
             }
         } catch (InterruptedException exc) {
@@ -32,4 +38,7 @@ public class Producer implements Runnable {
         }
     }
 
+    public String getName() {
+        return name;
+    }
 }

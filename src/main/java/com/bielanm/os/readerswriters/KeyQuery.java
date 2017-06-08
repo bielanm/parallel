@@ -6,6 +6,7 @@ public class KeyQuery implements Query {
 
     public KeyQuery(String key) {
         this.key = key;
+
     }
 
     @Override
