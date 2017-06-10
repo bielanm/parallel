@@ -1,7 +1,7 @@
 package com.romanb.net;
 
-import com.romanb.cuncurency.Cuncurent;
-import com.romanb.cuncurency.PoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HttpServer extends SocketServer {
 
@@ -9,7 +9,7 @@ public class HttpServer extends SocketServer {
 
     public HttpServer(int port, RequestHandler requestHandler) {
         super(port);
-        PoolExecutor poolExecutor = Cuncurent.simpleFixedPoolExecutor(POOL_EXECUTOR_SIZE);
+        ExecutorService poolExecutor = Executors.newFixedThreadPool(POOL_EXECUTOR_SIZE);
         setСonnectionHandler(new HttpConnectionHandler(requestHandler, poolExecutor));
     }
 }
