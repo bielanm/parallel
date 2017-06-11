@@ -1,6 +1,6 @@
 package com.bielanm.os.sleepingbarberproblem;
 
-import com.bielanm.cuncurency.AtomicInteger;
+import com.bielanm.cuncurency.AtomicInt;
 import com.bielanm.cuncurency.Lock;
 
 import java.util.Queue;
@@ -13,7 +13,7 @@ public class BarberShop {
 
     private final Lock doorLock;
 
-    private AtomicInteger integer = new AtomicInteger(0);
+    private AtomicInt integer = new AtomicInt(0);
 
     public BarberShop(Barber barber, Queue<Client> barberQueue) {
         this.barber = barber;

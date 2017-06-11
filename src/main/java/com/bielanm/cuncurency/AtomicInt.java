@@ -1,10 +1,10 @@
 package com.bielanm.cuncurency;
 
-public class AtomicInteger {
+public class AtomicInt {
 
     private volatile int value;
 
-    public AtomicInteger(int value) {
+    public AtomicInt(int value) {
         this.value = value;
     }
 

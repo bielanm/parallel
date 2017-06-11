@@ -1,14 +1,14 @@
 package com.bielanm.os.sleepingbarberproblem;
 
 
-import com.bielanm.cuncurency.AtomicInteger;
+import com.bielanm.cuncurency.AtomicInt;
 
 import static com.bielanm.os.SleepingBarberProblem.BARBER_SHAVE_TIME;
 
 public class Barber {
 
     private volatile boolean isSleep = true;
-    private volatile AtomicInteger current = new AtomicInteger(0);
+    private volatile AtomicInt current = new AtomicInt(0);
 
     public void shave(Client client) {
         current.incrementAndGet();

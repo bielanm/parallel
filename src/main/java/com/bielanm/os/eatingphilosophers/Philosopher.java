@@ -1,6 +1,6 @@
 package com.bielanm.os.eatingphilosophers;
 
-import com.bielanm.cuncurency.AtomicInteger;
+import com.bielanm.cuncurency.AtomicInt;
 import com.bielanm.util.Randomizer;
 
 public class Philosopher {
@@ -14,7 +14,7 @@ public class Philosopher {
     private final Fork leftFork;
     private final Fork rightFork;
 
-    private static AtomicInteger  counter = new AtomicInteger(0);
+    private static AtomicInt counter = new AtomicInt(0);
 
     public Philosopher(String name, Fork leftFork, Fork rightFork) {
         this.name = name;

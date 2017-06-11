@@ -1,13 +1,12 @@
 package com.bielanm.os;
 
-import com.bielanm.cuncurency.AtomicInteger;
+import com.bielanm.cuncurency.AtomicInt;
 import com.bielanm.cuncurency.Cuncurent;
 import com.bielanm.cuncurency.PoolExecutor;
 import com.bielanm.os.eatingphilosophers.Fork;
 import com.bielanm.os.eatingphilosophers.Philosopher;
 import com.bielanm.util.Randomizer;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -37,7 +36,7 @@ public class EatingPhilosophersProblem {
 //            final Philosopher philosopher = philosophers.get(i);
 //            System.out.println(philosopher);
 //            lifeCycles.add(() -> {
-//                AtomicInteger count = new AtomicInteger(0);
+//                AtomicInt count = new AtomicInt(0);
 //                try {
 //                    while (CYCLES_COUNT >= count.incrementAndGet()) {
 //                        System.out.println(philosopher.getName() + " start " + count.get() + " lifecycle.");
@@ -49,7 +48,7 @@ public class EatingPhilosophersProblem {
 //            });
 //        }
 
-        AtomicInteger count = new AtomicInteger(0);
+        AtomicInt count = new AtomicInt(0);
         while (CYCLES_COUNT/4 >= count.incrementAndGet()) {
             for (int j = 0; j < philosophers.size(); j++) {
                 final Philosopher philosopher1 = philosophers.get(j);

@@ -2,11 +2,11 @@ package com.bielanm.cuncurency;
 
 public class CountHandler implements Command {
 
-    private AtomicInteger counter;
+    private AtomicInt counter;
     private Runnable task;
 
     public CountHandler(int count, Runnable task) {
-        this.counter = new AtomicInteger(count);
+        this.counter = new AtomicInt(count);
         this.task = task;
     }
 

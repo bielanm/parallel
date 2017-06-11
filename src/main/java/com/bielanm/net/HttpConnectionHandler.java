@@ -11,6 +11,8 @@ import static java.util.Objects.nonNull;
 
 public class HttpConnectionHandler implements ConnectionHandler {
 
+    private final int HTTP_LENGTH = 10000;
+
     private final RequestHandler requestHandler;
     private final PoolExecutor poolExecutor;
 
@@ -26,20 +28,27 @@ public class HttpConnectionHandler implements ConnectionHandler {
         OutputStream outputStream = socket.getOutputStream();
         PrintWriter printWriter = new PrintWriter(outputStream);
 
-        int length = inputStream.available();
-        byte[] requestBody = new byte[length];
-        inputStream.read(requestBody);
-        String request = new String(requestBody);
+        byte[] bytes = new byte[HTTP_LENGTH];
+        int length = inputStream.read(bytes);
+        if(length == -1) {
+            throw new IOException("Empty stream");
+        }
+        String request = new String(bytes, 0, length);
         System.out.println("Request:\n" + request);
         final HttpRequest httpRequest = HttpInterfacesFactory.createHttpRequest(request);
         final HttpResponse httpResponse = HttpInterfacesFactory.createHttpResponse(printWriter, httpRequest);
         poolExecutor.submit(() -> {
-            try(Socket close = socket) {
+            try {
                 requestHandler.handleRequest(httpRequest, httpResponse);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
+
     }
 
     @Override

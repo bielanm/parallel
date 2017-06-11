@@ -1,11 +1,11 @@
 package com.bielanm.os.producerconsumer;
 
 
-import com.bielanm.cuncurency.AtomicInteger;
+import com.bielanm.cuncurency.AtomicInt;
 
 public class Process implements Runnable {
 
-    private static AtomicInteger count = new AtomicInteger(0);
+    private static AtomicInt count = new AtomicInt(0);
     private final long execMilis;
     private final String name;
     private String author;

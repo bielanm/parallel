@@ -4,7 +4,7 @@ package com.bielanm.cuncurency;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class LinkedBlockingQueue extends ConcurrentLinkedQueue<Runnable> implements BlockingQueue {
+public class LinkedBlockingQueue extends LinkedList<Runnable> implements BlockingQueue {
 
     volatile protected int size = 0;
 

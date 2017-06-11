@@ -1,13 +1,13 @@
 package com.bielanm.os.producerconsumer;
 
-import com.bielanm.cuncurency.AtomicInteger;
+import com.bielanm.cuncurency.AtomicInt;
 
 public class Producer implements Runnable {
 
     private final long sleepMilis;
     private final int maxProcess;
     private final ProcessQueue blockingQueue;
-    private AtomicInteger processCount;
+    private AtomicInt processCount;
     private String name;
     private static int count = 0;
 
@@ -15,7 +15,7 @@ public class Producer implements Runnable {
         this.blockingQueue = blockingQueue;
         this.sleepMilis = sleepMilis;
         this.maxProcess = maxProcess;
-        processCount = new AtomicInteger(0);
+        processCount = new AtomicInt(0);
 
         name = "Producer_" + count++;
     }

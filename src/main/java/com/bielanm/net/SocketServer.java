@@ -38,7 +38,7 @@ public class SocketServer implements Server{
                 try {
                     сonnectionHandler.handle(socket);
                 } catch (IOException exc) {
-                    System.out.println("Socket IOException");
+                    System.out.println("IO exception");
                     socket.close();
                 }
             }
