@@ -60,16 +60,22 @@ public class Integrator {
 
         Double[] alpha = new Double[size];
         Double[] betta = new Double[size];
-        for (int i = 0; i < center; i++) {
 
+        alpha[0] = -C[0]/B[0];
+        betta[0] = b[0]/B[0];
+        for (int i = 1; i < center; i++) {
+            alpha[i] = -C[i]/(A[i]*alpha[i] + B[i]);
+            betta[i] = (b[i] - A[i]*C[i])/(A[i]*alpha[i] + B[i]);
         }
 
+        alpha[size-1] = -A[0]/B[0];
+        betta[size-1] = b[0]/B[0];
         for (int i = center; i < size; i++) {
-
+            alpha[i] = -C[i]/(A[i]*alpha[i] + B[i]);
+            betta[i] = (b[i] - A[i]*C[i])/(A[i]*alpha[i] + B[i]);
         }
 
         return new Double[0];
     }
-
 
 }
