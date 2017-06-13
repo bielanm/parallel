@@ -16,7 +16,7 @@ public class CourseWork {
     private static final double A = 1;
     private static final double a = 1;
 
-    private static final int intervals = 10;
+    private static final int intervals = 9;
     private static final double xstart = 0;
     private static final double xend = 1;
     private static final double tstart = 0;
@@ -27,7 +27,7 @@ public class CourseWork {
         double xstep = (xend - xstart)/intervals;
         double tstep = (tend - tstart)/intervals;
 
-        Valueable solution = (params) -> 1 + A*Math.exp(params[0]/Math.sqrt(2) + a*params[1] - params[1]/2);
+        Valueable solution = (params) -> 1/(1 + A*Math.exp(params[0]/Math.sqrt(2) + a*params[1] - params[1]/2));
         Double[] x = new Double[intervals + 1];
         Double[] t = new Double[intervals + 1];
         Double[] boundary = new Double[intervals + 1];
@@ -45,8 +45,14 @@ public class CourseWork {
                 (params) -> params[0]*(params[3]/(xstep*xstep)) - params[1]*(1 + 2*(params[3]/(xstep*xstep))) + params[2]*(params[3]/(xstep*xstep)),
                 (params) -> params[0]*(params[1] + 1) - params[0]*params[0]*params[0]
         );
-        Integrator.solveImplicity(x, t, boundary, start, end, equation);
+        Double[][] solutions = Integrator.solveImplicity(x, t, boundary, start, end, equation);
 
+        for (int i = 0; i < solutions.length; i++) {
+            for (int j = 0; j < solutions[i].length; j++) {
+                System.out.print(solutions[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 
 }
