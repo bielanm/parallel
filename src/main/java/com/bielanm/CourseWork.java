@@ -33,23 +33,34 @@ public class CourseWork {
         Double[] boundary = new Double[intervals + 1];
         Double[] start = new Double[intervals + 1];
         Double[] end = new Double[intervals + 1];
+
         Supplier<IntStream> range = () -> IntStream.range(0, intervals + 1);
-        range.get().boxed().forEach(i -> x[i] = xstart + i*xstep);
-        range.get().boxed().forEach(i -> t[i] = tstart + i*tstep);
-        range.get().boxed().forEach(i -> boundary[i] = solution.value(xstart + i*xstep, 0));
-        range.get().boxed().forEach(i -> start[i] = solution.value(xstart, tstart + i*tstep));
-        range.get().boxed().forEach(i -> end[i] = solution.value(xend, tstart  + i*tstep));
+        range.get().boxed().forEach(i -> {
+            t[i] = tstart + i*tstep;
+            x[i] = xstart + i*xstep;
+            boundary[i] = solution.value(xstart + i*xstep, tstart);
+            start[i] = solution.value(xstart, tstart + i*tstep);
+            end[i] = solution.value(xend, tstart  + i*tstep);
+        });
 
         System.out.println();
         Pair<Valueable, Valueable> equation = new Pair<>(
-                (params) -> params[0]*(params[3]/(xstep*xstep)) - params[1]*(1 + 2*(params[3]/(xstep*xstep))) + params[2]*(params[3]/(xstep*xstep)),
-                (params) -> params[0]*(params[1] + 1) - params[0]*params[0]*params[0]
+                (params) -> -params[0]*(tstep/(xstep*xstep)) + params[1]*(1 + 2*(tstep/(xstep*xstep))) - params[2]*(tstep/(xstep*xstep)),
+                (params) -> -params[0]*(tstep - 1) + tstep*params[0]*params[0]*params[0]
         );
         Double[][] solutions = Integrator.solveImplicity(x, t, boundary, start, end, equation);
 
         for (int i = 0; i < solutions.length; i++) {
             for (int j = 0; j < solutions[i].length; j++) {
                 System.out.print(solutions[i][j] + " ");
+            }
+            System.out.println();
+        }
+
+        System.out.println();
+        for (int i = 0; i <= intervals; i++) {
+            for (int j = 0; j <= intervals; j++) {
+                System.out.print((solution.value(xstart + j*xstep, tstart + tstep*i) - solutions[i][j]) + " ");
             }
             System.out.println();
         }
