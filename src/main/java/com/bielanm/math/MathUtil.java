@@ -3,12 +3,12 @@ package com.bielanm.math;
 import com.bielanm.FourthSolution;
 import com.bielanm.cuncurency.Cuncurent;
 import com.bielanm.cuncurency.PoolExecutor;
+import mpi.MPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 
 public class MathUtil {
@@ -119,6 +119,50 @@ public class MathUtil {
         }
     }
 
+    public static void straightCalcMPI(Matrix matrix, DoubleVector vector) {
+        int pid = MPI.COMM_WORLD.Rank();
+
+        List<DoubleVector> rows = matrix.getRows();
+        List<Runnable> tasks = new ArrayList<>();
+
+        for (int i = 0; i < matrix.getOrder() - 1; i++) {
+            int processCount = MPI.COMM_WORLD.Size();
+            double[] toSend = null;
+            int[] sizes = null;
+            int[] elementsPerProcess = null;
+            if(pid == 0) {
+                int count = matrix.getOrder() - i - 1;
+                useMainElementByColumn(matrix, vector, i);
+                DoubleVector start = rows.get(i);
+                toSend = new double[(count + 1)* count / 2];
+                sizes = new int[count];
+                int k = 0;
+                int sizesIndex = 0;
+                for (int j = i + 1; j < matrix.getOrder(); j++) {
+                    int rowSize = matrix.getOrder() - j;
+                    DoubleVector currentVector = rows.get(j);
+                    double[] row = currentVector.stream().mapToDouble(Double::doubleValue).toArray();
+                    System.arraycopy(row, j, toSend, k, rowSize);
+                    k += rowSize;
+                    sizes[sizesIndex++] = rowSize;
+                }
+
+                int sizeIteration = count;
+                elementsPerProcess = new int[MPI.COMM_WORLD.Size()];
+                int min = count/MPI.COMM_WORLD.Size();
+                Arrays.fill(elementsPerProcess, min);
+                for (int j = 0; j < count - min*MPI.COMM_WORLD.Size(); j++) {
+                    elementsPerProcess[j] = elementsPerProcess[j] + 1;
+                }
+                System.out.println("No Dno");
+            }
+
+            MPI.COMM_WORLD.Scatterv(toSend, 0, elementsPerProcess, sizes, MPI.DOUBLE, null, 0, 0, MPI.DOUBLE, 0);
+
+            System.out.println("Dno");
+        }
+    }
+
     private static void useMainElementByColumn(Matrix matrix, DoubleVector vector, int columnNumber) {
         int max = columnNumber;
         for (int i = columnNumber + 1; i < matrix.getOrder(); i++) {
@@ -137,6 +181,29 @@ public class MathUtil {
     }
 
     public static void backCalc(Matrix matrix, DoubleVector vector) {
+        List<DoubleVector> rows = matrix.getRows();
+        List<Runnable> tasks = new ArrayList<>();
+
+        for (int i = matrix.getOrder() - 1; i >= 0; i--) {
+            final int columnNumber = i;
+            DoubleVector start = rows.get(columnNumber);
+            for (int j = columnNumber - 1; j >= 0; j--) {
+                final int row = j;
+                final DoubleVector currentVector = rows.get(row);
+                if (currentVector.get(columnNumber) != 0) continue;
+                final Double koef = currentVector.get(columnNumber)/start.get(columnNumber);
+
+                tasks.add(() -> {
+                    rows.set(row, subtraction(currentVector, multiply(start, koef)));
+                    vector.set(row, vector.get(row) - vector.get(columnNumber)*koef);
+                });
+            }
+            poolExecutor.submit(tasks);
+            tasks.clear();
+        }
+    }
+
+    public static void backCalcMPI(Matrix matrix, DoubleVector vector) {
         List<DoubleVector> rows = matrix.getRows();
         List<Runnable> tasks = new ArrayList<>();
 
