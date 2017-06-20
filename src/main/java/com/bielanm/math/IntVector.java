@@ -44,6 +44,11 @@ public class IntVector extends NotNullArrayList<Integer> implements Vector<Integ
     }
 
     @Override
+    public Integer get(int index) {
+        return super.get(index);
+    }
+
+    @Override
     public String toString() {
         return stream().map(i -> i.toString()).collect(Collectors.joining(", "));
     }

@@ -126,40 +126,32 @@ public class MathUtil {
         List<Runnable> tasks = new ArrayList<>();
 
         for (int i = 0; i < matrix.getOrder() - 1; i++) {
-            int processCount = MPI.COMM_WORLD.Size();
-            double[] toSend = null;
-            int[] sizes = null;
-            int[] elementsPerProcess = null;
+            double[] toSend = new double[matrix.getOrder()*(matrix.getOrder() - i - 1)];
+
+            int[] elementsPerProcess = new int[MPI.COMM_WORLD.Size()];
+            int min = matrix.getOrder()/MPI.COMM_WORLD.Size();
+            Arrays.fill(elementsPerProcess, min);
+            for (int j = 0; j < matrix.getOrder() - min*MPI.COMM_WORLD.Size(); j++) {
+                elementsPerProcess[j] = elementsPerProcess[j] + 1;
+            }
+
             if(pid == 0) {
-                int count = matrix.getOrder() - i - 1;
                 useMainElementByColumn(matrix, vector, i);
-                DoubleVector start = rows.get(i);
-                toSend = new double[(count + 1)* count / 2];
-                sizes = new int[count];
                 int k = 0;
-                int sizesIndex = 0;
                 for (int j = i + 1; j < matrix.getOrder(); j++) {
-                    int rowSize = matrix.getOrder() - j;
                     DoubleVector currentVector = rows.get(j);
                     double[] row = currentVector.stream().mapToDouble(Double::doubleValue).toArray();
-                    System.arraycopy(row, j, toSend, k, rowSize);
-                    k += rowSize;
-                    sizes[sizesIndex++] = rowSize;
+                    System.arraycopy(row, 0, toSend, k, matrix.getOrder());
+                    k +=  matrix.getOrder();
                 }
 
-                int sizeIteration = count;
-                elementsPerProcess = new int[MPI.COMM_WORLD.Size()];
-                int min = count/MPI.COMM_WORLD.Size();
-                Arrays.fill(elementsPerProcess, min);
-                for (int j = 0; j < count - min*MPI.COMM_WORLD.Size(); j++) {
-                    elementsPerProcess[j] = elementsPerProcess[j] + 1;
-                }
                 System.out.println("No Dno");
             }
 
-            MPI.COMM_WORLD.Scatterv(toSend, 0, elementsPerProcess, sizes, MPI.DOUBLE, null, 0, 0, MPI.DOUBLE, 0);
-
-            System.out.println("Dno");
+            int size = elementsPerProcess[pid]*matrix.getOrder();
+            double[] buffer = new double[size];
+            MPI.COMM_WORLD.Scatter(toSend, 0, matrix.getOrder(), MPI.DOUBLE, buffer, 0, size, MPI.DOUBLE, 0);
+            System.out.println(buffer);
         }
     }
 
