@@ -21,7 +21,7 @@ public class CourseWork {
     private static final double A = 1;
     private static final double a = 1;
 
-    private static final int intervals = 100;
+    private static final int intervals = 10;
     private static final double xstart = 0;
     private static final double xend = 1;
     private static final double tstart = 0;
