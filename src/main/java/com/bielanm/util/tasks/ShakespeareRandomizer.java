@@ -1,4 +1,4 @@
-package com.bielanm.util.fifthlab;
+package com.bielanm.util.tasks;
 
 import com.bielanm.util.Randomizer;
 
